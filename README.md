@@ -18,16 +18,37 @@ Replace this paragraph with your own summary of what your version does.
 ## How The System Works
 
 Explain your design in plain language.
+So the way real-world recommendation systems work is that they use a multitude of indicators for different situations. Depending on what they are recommending, they could use what other users with similar tastes liked or songs with similar stats as the one you listen to or maybe something else. But it all kind of boils down to some sort of ranking system of a list of songs I think. I will focus on a mix of both depending on what features will exist in my recommendation system.
 
 Some prompts to answer:
 
 - What features does each `Song` use in your system
   - For example: genre, mood, energy, tempo
+  the features in each Song will contain energy, acousticness, tempo_bpm
 - What information does your `UserProfile` store
+  user profile will store information about previous songs they've liked, averages stats on the energy of songs, acousticness, and tempo_bpm (maybe a few other stats as well) of songs they've liked so far.
 - How does your `Recommender` compute a score for each song
+  I feel like I wouldn't explain it perfectly, so I had Claude generate a small table to make it easier and I have an explanation that I've written below
+
+  Each song is scored on a 0–4 point scale using this recipe:
+
+  | Rule | Points |
+  |------|--------|
+  | Genre matches `favorite_genre` | +1.0 |
+  | Mood matches `favorite_mood` | +0.5 |
+  | Energy similarity: `(1 - \|song.energy - target_energy\|) × 0.40` | 0–0.40 |
+  | Acousticness similarity: `(1 - \|song.acousticness - target_acousticness\|) × 0.40` | 0–0.40 |
+  | Tempo similarity: `(1 - \|song.tempo_norm - target_tempo_norm\|) × 0.20` | 0–0.20 |
+
+  So, genre and mood bonuses basically reward exact categorical matches. The three numeric features in the table above use weighted scores, where a song that exactly matches the target value gets the full weight; a song at maximum distance gets 0. Lastly, all five components are summed into a single final score
+
 - How do you choose which songs to recommend
+  All songs in the catalog are scored and then sorted by final score in descending order. The top `k` songs (with default being k=5) are returned. No score threshold is applied and the system always returns exactly k results, even if the scores are low. Next, songs are never filtered by genre or mood alone, instead the categorical bonuses just shift the ranking instead of excluding songs, which might be an issue actually since this takes a more numerical approach. Sometimes the numerical values don't match up with the actual vibe or genre of the song, so this could be a little too algorithmic and strict.
 
 You can include a simple diagram or bullet list if helpful.
+flowchart:
+    A[/"Input\nUser Preferences"/] --> B[/"Process\nFor each song in CSV:\nscore = weighted distance\nfrom user targets"/] --> C[/"Output\nTop-K Ranked\nRecommendations"/]
+
 
 ---
 
@@ -209,3 +230,4 @@ A few sentences about what you learned:
 - How did building this change how you think about real music recommenders
 - Where do you think human judgment still matters, even if the model seems "smart"
 
+![alt text](image.png)
