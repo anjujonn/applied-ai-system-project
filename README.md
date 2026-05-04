@@ -1,5 +1,9 @@
 # AI Music Recommender — RAG Edition
 
+## Video Link
+`https://www.loom.com/share/9845bad6881345aa9901e22fb1a06453`
+
+
 ## Original Project (Module 3)
 
 So, **SingYourSong 1.0** was originally built in Module 3 as a rule-based music recommender that scores every song in a 20-song CSV catalog against a user's taste profile (the specific metrics I focused on were preferred genre, mood, energy level, acousticness, and tempo). It ranked songs by a weighted distance formula and returned the top-k results with plain-text explanations. The original system had no AI language model and no external API. It was a pretty plain ranking system.
