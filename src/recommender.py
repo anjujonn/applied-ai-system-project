@@ -28,7 +28,9 @@ class UserProfile:
     favorite_genre: str
     favorite_mood: str
     target_energy: float
-    likes_acoustic: bool
+    likes_acoustic: bool = False
+    target_acousticness: float = 0.5
+    target_tempo_norm: float = 0.5
 
 class Recommender:
     """
@@ -39,12 +41,38 @@ class Recommender:
         self.songs = songs
 
     def recommend(self, user: UserProfile, k: int = 5) -> List[Song]:
-        # TODO: Implement recommendation logic
-        return self.songs[:k]
+        user_prefs = {
+            "favorite_genre": user.favorite_genre,
+            "favorite_mood": user.favorite_mood,
+            "target_energy": user.target_energy,
+            "target_acousticness": user.target_acousticness,
+            "target_tempo_norm": user.target_tempo_norm,
+        }
+        song_dicts = [
+            {"id": s.id, "title": s.title, "artist": s.artist, "genre": s.genre,
+             "mood": s.mood, "energy": s.energy, "tempo_bpm": s.tempo_bpm,
+             "valence": s.valence, "danceability": s.danceability, "acousticness": s.acousticness}
+            for s in self.songs
+        ]
+        scored = [(s, *score_song(user_prefs, sd)) for s, sd in zip(self.songs, song_dicts)]
+        ranked = sorted(scored, key=lambda x: x[1], reverse=True)
+        return [song for song, _, _ in ranked[:k]]
 
     def explain_recommendation(self, user: UserProfile, song: Song) -> str:
-        # TODO: Implement explanation logic
-        return "Explanation placeholder"
+        user_prefs = {
+            "favorite_genre": user.favorite_genre,
+            "favorite_mood": user.favorite_mood,
+            "target_energy": user.target_energy,
+            "target_acousticness": user.target_acousticness,
+            "target_tempo_norm": user.target_tempo_norm,
+        }
+        song_dict = {
+            "id": song.id, "title": song.title, "artist": song.artist, "genre": song.genre,
+            "mood": song.mood, "energy": song.energy, "tempo_bpm": song.tempo_bpm,
+            "valence": song.valence, "danceability": song.danceability, "acousticness": song.acousticness
+        }
+        score, reasons = score_song(user_prefs, song_dict)
+        return f"Score {score:.2f}/2.40 — {', '.join(reasons)}"
 
 def load_songs(csv_path: str) -> List[Dict]:
     """
